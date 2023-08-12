@@ -18,34 +18,27 @@ import (
 //}
 import "C"
 
-// func main() {
-
-// 	time.Sleep(1 * time.Second)
-// 	fmt.Println(os.Getpid(), "Hello World")
-//     fmt.Println(int(C.getpid()))
-//    //      char *args[]={"./v1",NULL};
-//         C.newProc();
-// }
-
-
+// TODO: Get file name from the directory or check the mod file or something else
 // var goExecutable = "my_program"
 var AKAR = 0
 
 func compileAndRun() error {
-	// fmt.Println("Compiling...")
-	// cmd := exec.Command("go", "build")
-	// out, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	fmt.Println("Compilation failed:", string(out))
-	// 	return err
-	// }
 
-	fmt.Println("Running...")
-	// cmd = exec.Command("./v1")
+	if AKAR == 1{
+		fmt.Println("Compiling...")
+	}
+
+	cmd := exec.Command("go", "build")
+	out, err := cmd.CombinedOutput()
+	if err != nil && AKAR == 1 {
+		fmt.Println("Compilation failed:", string(out))
+		return err
+	}
+	if AKAR == 1{
+		fmt.Println("Running...")
+	}
 	C.newProc();
-	// cmd.Stdin = os.Stdin
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
+
 	return nil
 }
 
@@ -57,28 +50,18 @@ func MonitorChanges() {
 	var lastCompileTime time.Time
 
 	for {
+		// TODO: Use signals to monitor file changes
 		// Sleep for a short duration to avoid too frequent checks
 		time.Sleep(5 * time.Second)
 
-		if AKAR == 1{
-			fmt.Println("Compiling...")
-		}
-		cmd := exec.Command("go", "build")
-		out, err := cmd.CombinedOutput()
-		if err != nil  && AKAR == 1{
-			fmt.Println("Compilation failed:", string(out))
-		}
-	
-		if AKAR == 1{
-			fmt.Println("Running...")
-		}
-		// cmd = exec.Command("./v1")
-		C.newProc();
+		// TOOD: Find effective way to avoid compilation and Running everytime
+		compileAndRun() 
 
 		if AKAR != 1 {
 			continue
 		}
 
+		// TODO: Cleanup this code
 		filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return nil
@@ -87,8 +70,7 @@ func MonitorChanges() {
 			if !info.IsDir() && isGoFile(info.Name()) {
 				modTime := info.ModTime()
 				if modTime.After(lastCompileTime) {
-					fmt.Println("File change detected.")// Killing previous instance...")
-					//exec.Command("pkill", "v1").Run()
+					fmt.Println("File change detected.")
 					lastCompileTime = modTime
 
 					if err := compileAndRun(); err != nil {
