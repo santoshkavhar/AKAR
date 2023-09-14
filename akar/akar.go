@@ -15,7 +15,7 @@ import (
 // #include <errno.h>
 // #include <unistd.h>
 // #include <stdlib.h>
-// void newProc(char *str){
+// void runSameProc(char *str){
 //	char *args[]={str, NULL};
 //	execvp(args[0], args);
 //}
@@ -29,7 +29,7 @@ var binaryName = ""
 func compileAndRun() error {
 
 	if AKAR == 1 {
-		fmt.Println("Compiling...")
+		fmt.Print("Compiling...\r")
 	}
 
 	cmd := exec.Command("go", "build")
@@ -40,7 +40,7 @@ func compileAndRun() error {
 	}
 	//fmt.Println(out)
 	if AKAR == 1 {
-		fmt.Println("Running...")
+		fmt.Print("Running...\r")
 	}
 
 	// Convert Go string to C string
@@ -49,9 +49,7 @@ func compileAndRun() error {
 	defer C.free(unsafe.Pointer(cBinaryName)) // Free the C string when done
 
 	// Call the C function with the C string
-	C.newProc(cBinaryName)
-
-	//C.newProc(binaryName)
+	C.runSameProc(cBinaryName)
 
 	return nil
 }
@@ -140,7 +138,7 @@ func getBinaryName() {
 			if len(parts) > 0 {
 				// Output the last part
 				lastPart := parts[len(parts)-1]
-				fmt.Println("Last word from the second word(Binary name):", lastPart)
+				//fmt.Print("Last word from the second word(Binary name): ", lastPart, "\r")
 				binaryName = lastPart
 			}
 		}
