@@ -25,11 +25,12 @@ import "C"
 // var goExecutable = "my_program"
 var AKAR = 0
 var binaryName = ""
+var lastCompileTime = time.Now()
 
 func compileAndRun() error {
 
 	if AKAR == 1 {
-		fmt.Print("Compiling...\r")
+		fmt.Println("Compiling...")
 	}
 
 	cmd := exec.Command("go", "build")
@@ -40,7 +41,7 @@ func compileAndRun() error {
 	}
 	//fmt.Println(out)
 	if AKAR == 1 {
-		fmt.Print("Running...\r")
+		fmt.Println("Running...")
 	}
 
 	// Convert Go string to C string
@@ -59,25 +60,21 @@ func isGoFile(filename string) bool {
 }
 
 func MonitorChanges() {
-	var lastCompileTime time.Time
 
 	getBinaryName()
 
 	for {
-		// TODO: Use signals to monitor file changes
 		// Sleep for a short duration to avoid too frequent checks
+		// TODO: Let this be user settable
 		time.Sleep(5 * time.Second)
-
-		// TOOD: Find effective way to avoid compilation and Running everytime
-		compileAndRun()
 
 		if AKAR != 1 {
 			continue
 		}
 
-		// TODO: Cleanup this code
 		filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 			if err != nil {
+				fmt.Println("error walking")
 				return nil
 			}
 
