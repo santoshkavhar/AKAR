@@ -7,19 +7,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
-	"unsafe"
 )
-
-// #include <stdio.h>
-// #include <errno.h>
-// #include <unistd.h>
-// #include <stdlib.h>
-// void runSameProc(char *str){
-//	char *args[]={str, NULL};
-//	execvp(args[0], args);
-//}
-import "C"
 
 // TODO: Get file name from the directory or check the mod file or something else
 // var goExecutable = "my_program"
@@ -44,14 +34,21 @@ func compileAndRun() error {
 		fmt.Println("Running...")
 	}
 
-	// Convert Go string to C string
 	binaryName = "./" + binaryName
-	cBinaryName := C.CString(binaryName)
-	defer C.free(unsafe.Pointer(cBinaryName)) // Free the C string when done
 
-	// Call the C function with the C string
-	C.runSameProc(cBinaryName)
+	binary, lookErr := exec.LookPath(binaryName)
+	if lookErr != nil {
+		panic(lookErr)
+	}
 
+	args := []string{binaryName}
+
+	env := os.Environ()
+
+	execErr := syscall.Exec(binary, args, env)
+	if execErr != nil {
+		panic(execErr)
+	}
 	return nil
 }
 
